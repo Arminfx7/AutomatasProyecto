@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Validador de Expresiones Regulares</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(0, 255, 255, 0.05) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridMove 20s linear infinite;
+        }
+
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        .container {
+            background: rgba(15, 15, 35, 0.95);
+            border-radius: 20px;
+            width: 100%;
+            max-width: 1000px;
+            box-shadow: 0 0 50px rgba(0, 255, 255, 0.3), 
+                        inset 0 0 50px rgba(0, 255, 255, 0.05);
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            overflow: hidden;
+            position: relative;
+            z-index: 1;
+            backdrop-filter: blur(10px);
+        }
+
+        .header {
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(255, 0, 255, 0.1));
+            padding: 30px;
+            text-align: center;
+            border-bottom: 2px solid rgba(0, 255, 255, 0.5);
+            position: relative;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.3), transparent);
+            animation: shine 3s infinite;
+        }
+
+        @keyframes shine {
+            0% { left: -100%; }
+            50%, 100% { left: 100%; }
+        }
+
+        .header h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 32px;
+            font-weight: 900;
+            background: linear-gradient(90deg, #00ffff, #ff00ff, #00ffff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            animation: glow 2s ease-in-out infinite;
+        }
+
+        @keyframes glow {
+            0%, 100% { filter: drop-shadow(0 0 10px rgba(0, 255, 255, 0.8)); }
+            50% { filter: drop-shadow(0 0 20px rgba(255, 0, 255, 0.8)); }
+        }
+
+        .input-section {
+            padding: 30px;
+            background: rgba(10, 10, 30, 0.5);
+        }
+
+        .input-wrapper {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .input-label {
+            font-size: 14px;
+            color: #00ffff;
+            margin-bottom: 10px;
+            display: block;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 600;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 15px 20px;
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            border-radius: 10px;
+            color: #00ffff;
+            font-size: 18px;
+            font-family: 'Rajdhani', sans-serif;
+            transition: all 0.3s;
+            outline: none;
+        }
+
+        input[type="text"]:focus {
+            border-color: #00ffff;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+            background: rgba(0, 20, 40, 0.9);
+        }
+
+        input[type="text"]::placeholder {
+            color: rgba(0, 255, 255, 0.3);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        button {
+            flex: 1;
+            padding: 15px 30px;
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.2), rgba(0, 200, 200, 0.2));
+            border: 2px solid #00ffff;
+            border-radius: 10px;
+            color: #00ffff;
+            font-size: 16px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(0, 255, 255, 0.3);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.5s, height 0.5s;
+        }
+
+        button:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        button:hover {
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.6);
+            transform: translateY(-2px);
+        }
+
+        button span {
+            position: relative;
+            z-index: 1;
+        }
+
+        .btn-clear {
+            background: linear-gradient(135deg, rgba(255, 0, 255, 0.2), rgba(200, 0, 200, 0.2));
+            border-color: #ff00ff;
+            color: #ff00ff;
+        }
+
+        .btn-clear:hover {
+            box-shadow: 0 0 30px rgba(255, 0, 255, 0.6);
+        }
+
+        .btn-delete {
+            background: linear-gradient(135deg, rgba(255, 50, 50, 0.2), rgba(200, 0, 0, 0.2));
+            border-color: #ff3333;
+            color: #ff3333;
+        }
+
+        .btn-delete:hover {
+            box-shadow: 0 0 30px rgba(255, 50, 50, 0.6);
+        }
+
+        .results-section {
+            padding: 30px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .results-section::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        .results-section::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+        }
+
+        .results-section::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #00ffff, #ff00ff);
+            border-radius: 10px;
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            margin-bottom: 15px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            border-left: 4px solid;
+            animation: slideIn 0.5s ease-out;
+            transition: all 0.3s;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .result-item:hover {
+            transform: translateX(10px);
+            box-shadow: 0 5px 20px rgba(0, 255, 255, 0.3);
+        }
+
+        .result-item.accepted {
+            border-left-color: #00ff88;
+        }
+
+        .result-item.rejected {
+            border-left-color: #ff0066;
+        }
+
+        .result-input {
+            font-size: 18px;
+            color: #ffffff;
+            font-family: 'Courier New', monospace;
+            font-weight: 600;
+        }
+
+        .result-status {
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        .result-status.accepted {
+            background: rgba(0, 255, 136, 0.2);
+            color: #00ff88;
+            border: 2px solid #00ff88;
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.5);
+        }
+
+        .result-status.rejected {
+            background: rgba(255, 0, 102, 0.2);
+            color: #ff0066;
+            border: 2px solid #ff0066;
+            box-shadow: 0 0 15px rgba(255, 0, 102, 0.5);
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 50px 20px;
+            color: rgba(0, 255, 255, 0.5);
+            font-size: 18px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            padding: 20px 30px;
+            background: rgba(0, 0, 0, 0.3);
+            border-top: 2px solid rgba(0, 255, 255, 0.3);
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            font-family: 'Orbitron', sans-serif;
+            background: linear-gradient(90deg, #00ffff, #ff00ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: rgba(0, 255, 255, 0.7);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⚡ ArmínFX7⚡</h1>
+        </div>
+
+        <div class="input-section">
+            <div class="input-wrapper">
+                <label class="input-label">📝 Ingrese Cadena</label>
+                <input type="text" id="inputString" placeholder="Escriba aquí...">
+            </div>
+
+            <div class="button-group">
+                <button onclick="validateInput()"><span>✓ Validar</span></button>
+                <button class="btn-clear" onclick="clearInput()"><span>⟲ Limpiar</span></button>
+                <button class="btn-delete" onclick="clearHistory()"><span>🗑 Eliminar Historial</span></button>
+            </div>
+        </div>
+
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-value" id="totalCount">0</div>
+                <div class="stat-label">Total</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="acceptedCount" style="color: #00ff88;">0</div>
+                <div class="stat-label">Aceptadas</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="rejectedCount" style="color: #ff0066;">0</div>
+                <div class="stat-label">Rechazadas</div>
+            </div>
+        </div>
+
+        <div class="results-section" id="resultsSection">
+            <div class="no-results">Sin resultados aún...</div>
+        </div>
+    </div>
+
+    <script>
+        // Expresión regular corregida - convertir + a | (OR)
+        const FIXED_REGEX = "^((0|1|2|3|4|5|6|7|8|9)(0|1|2|3|4|5|6|7|8|9)*\\.|((B|C|D|F|G|H|I|J|K|L|Ll|M|N|Ñ|P|Q|R|S|T|U|V|W|X|Y|Z)(a|e|i|o|u|,|;|:|b|c|d|e|f|g|h|j|k|l|m|n|ñ|o|p|q|r|s|t|v|w|x|y|z)|(E|O)(a|b|c|d|e|f|g|h|i|j|k|l|m|n|ñ|o|p|q|r|s|t|u|v|w|x|y|z|,|;|:)|A(u|i)|I(a|u)|U(a|i)|U|A|I)((b|c|d|e|f|g|h|j|k|l|m|n|ñ|o|p|q|r|s|t|v|w|x|y|z|,|;|:)(a|e|i|o|u|,|;|:)|(ua|ui|au|ai|ia|iu|b|c|d|e|f|g|h|j|k|l|m|n|ñ|o|p|q|r|s|t|v|w|x|y|z|,|;|:))*\\.)$";
+
+        let validationHistory = [];
+        let acceptedCount = 0;
+        let rejectedCount = 0;
+
+        // Validar al presionar Enter
+        document.getElementById('inputString').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                validateInput();
+            }
+        });
+
+        function validateInput() {
+            const input = document.getElementById('inputString').value;
+            
+            if (input.trim() === '') {
+                return;
+            }
+
+            try {
+                const regex = new RegExp(FIXED_REGEX);
+                const isMatch = regex.test(input);
+                
+                addToHistory(input, isMatch);
+                updateStats();
+                
+                // Limpiar input después de validar
+                document.getElementById('inputString').value = '';
+                document.getElementById('inputString').focus();
+            } catch (e) {
+                console.error('Error en la expresión regular:', e);
+            }
+        }
+
+        function addToHistory(input, accepted) {
+            validationHistory.unshift({ input, accepted });
+            
+            if (accepted) {
+                acceptedCount++;
+            } else {
+                rejectedCount++;
+            }
+            
+            renderHistory();
+        }
+
+        function renderHistory() {
+            const resultsSection = document.getElementById('resultsSection');
+            
+            if (validationHistory.length === 0) {
+                resultsSection.innerHTML = '<div class="no-results">Sin resultados aún...</div>';
+                return;
+            }
+            
+            resultsSection.innerHTML = validationHistory.map(item => `
+                <div class="result-item ${item.accepted ? 'accepted' : 'rejected'}">
+                    <div class="result-input">${escapeHtml(item.input)}</div>
+                    <div class="result-status ${item.accepted ? 'accepted' : 'rejected'}">
+                        ${item.accepted ? '✓ Accept' : '✗ Reject'}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updateStats() {
+            document.getElementById('totalCount').textContent = validationHistory.length;
+            document.getElementById('acceptedCount').textContent = acceptedCount;
+            document.getElementById('rejectedCount').textContent = rejectedCount;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function clearInput() {
+            document.getElementById('inputString').value = '';
+            document.getElementById('inputString').focus();
+        }
+
+        function clearHistory() {
+            validationHistory = [];
+            acceptedCount = 0;
+            rejectedCount = 0;
+            renderHistory();
+            updateStats();
+        }
+
+        // Enfocar el input al cargar
+        window.onload = function() {
+            document.getElementById('inputString').focus();
+        };
+    </script>
+</body>
+</html>
