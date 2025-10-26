@@ -348,7 +348,16 @@
         <div class="input-section">
             <div class="input-wrapper">
                 <label class="input-label">📝 Ingrese Cadena</label>
-                <input type="text" id="inputString" placeholder="Escriba aquí...">
+                <input type="text" id="inputString" placeholder="Escriba aquí o cargue un archivo...">
+            </div>
+
+            <div class="input-wrapper">
+                <label class="input-label">📁 Cargar Archivo (.txt o .docx)</label>
+                <input type="file" id="fileInput" accept=".txt,.docx" style="display: none;">
+                <button onclick="document.getElementById('fileInput').click()" style="width: 100%; margin-bottom: 10px;">
+                    <span>📂 Seleccionar Archivo</span>
+                </button>
+                <div id="fileName" style="color: rgba(0, 255, 255, 0.7); font-size: 14px; margin-top: 5px; text-align: center;"></div>
             </div>
 
             <div class="button-group">
@@ -378,6 +387,7 @@
         </div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
     <script>
         // Expresión regular corregida - convertir + a | (OR)
         const FIXED_REGEX = "^((0|1|2|3|4|5|6|7|8|9)(0|1|2|3|4|5|6|7|8|9)*\\.|((B|C|D|F|G|H|I|J|K|L|Ll|M|N|Ñ|P|Q|R|S|T|U|V|W|X|Y|Z)(a|e|i|o|u|,|;|:|b|c|d|e|f|g|h|j|k|l|m|n|ñ|o|p|q|r|s|t|v|w|x|y|z)|(E|O)(a|b|c|d|e|f|g|h|i|j|k|l|m|n|ñ|o|p|q|r|s|t|u|v|w|x|y|z|,|;|:)|A(u|i)|I(a|u)|U(a|i)|U|A|I)((b|c|d|e|f|g|h|j|k|l|m|n|ñ|o|p|q|r|s|t|v|w|x|y|z|,|;|:)(a|e|i|o|u|,|;|:)|(ua|ui|au|ai|ia|iu|b|c|d|e|f|g|h|j|k|l|m|n|ñ|o|p|q|r|s|t|v|w|x|y|z|,|;|:))*\\.)$";
@@ -390,6 +400,52 @@
         document.getElementById('inputString').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 validateInput();
+            }
+        });
+
+        // Manejar carga de archivos
+        document.getElementById('fileInput').addEventListener('change', async function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const fileNameDisplay = document.getElementById('fileName');
+            fileNameDisplay.textContent = `📄 ${file.name}`;
+            fileNameDisplay.style.color = 'rgba(0, 255, 255, 0.7)';
+
+            try {
+                let text = '';
+                
+                if (file.name.endsWith('.txt')) {
+                    text = await file.text();
+                } else if (file.name.endsWith('.docx')) {
+                    const arrayBuffer = await file.arrayBuffer();
+                    const result = await mammoth.extractRawText({ arrayBuffer: arrayBuffer });
+                    text = result.value;
+                }
+
+                // Dividir el texto en líneas y procesar cada una
+                const lines = text.split('\n')
+                    .map(line => line.trim())
+                    .filter(line => line.length > 0);
+
+                // Validar cada línea automáticamente
+                lines.forEach(line => {
+                    const regex = new RegExp(FIXED_REGEX);
+                    const isMatch = regex.test(line);
+                    addToHistory(line, isMatch);
+                });
+
+                updateStats();
+                
+                // Limpiar el input y el selector de archivo
+                document.getElementById('inputString').value = '';
+                document.getElementById('fileInput').value = '';
+                fileNameDisplay.textContent = `✅ ${lines.length} líneas procesadas`;
+                
+            } catch (error) {
+                console.error('Error al leer el archivo:', error);
+                fileNameDisplay.textContent = '❌ Error al cargar el archivo';
+                fileNameDisplay.style.color = '#ff0066';
             }
         });
 
@@ -459,6 +515,8 @@
 
         function clearInput() {
             document.getElementById('inputString').value = '';
+            document.getElementById('fileInput').value = '';
+            document.getElementById('fileName').textContent = '';
             document.getElementById('inputString').focus();
         }
 
