@@ -430,8 +430,10 @@
 
                 // Validar cada línea automáticamente
                 lines.forEach(line => {
+                    // Eliminar espacios de la cadena antes de validar
+                    const fixedString = line.replace(/\s+/g, "");
                     const regex = new RegExp(FIXED_REGEX);
-                    const isMatch = regex.test(line);
+                    const isMatch = regex.test(fixedString);
                     addToHistory(line, isMatch);
                 });
 
@@ -457,8 +459,10 @@
             }
 
             try {
+                // Eliminar espacios de la cadena antes de validar
+                const fixedString = input.replace(/\s+/g, "");
                 const regex = new RegExp(FIXED_REGEX);
-                const isMatch = regex.test(input);
+                const isMatch = regex.test(fixedString);
                 
                 addToHistory(input, isMatch);
                 updateStats();
