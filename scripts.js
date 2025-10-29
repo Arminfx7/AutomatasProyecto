@@ -1,18 +1,15 @@
-// Expresión regular corregida - convertir + a | (OR)
 const FIXED_REGEX = "^((0|1|2|3|4|5|6|7|8|9)(0|1|2|3|4|5|6|7|8|9)*\\.|((B|C|D|F|G|H|I|J|K|L|Ll|M|N|Ñ|P|Q|R|S|T|U|V|W|X|Y|Z)(a|e|i|o|u|,|;|:|b|c|d|e|f|g|h|j|k|l|m|n|ñ|o|p|q|r|s|t|v|w|x|y|z)|(E|O)(a|b|c|d|e|f|g|h|i|j|k|l|m|n|ñ|o|p|q|r|s|t|u|v|w|x|y|z|,|;|:)|A(u|i)|I(a|u)|U(a|i)|U|A|I)((b|c|d|e|f|g|h|j|k|l|m|n|ñ|o|p|q|r|s|t|v|w|x|y|z|,|;|:)(a|e|i|o|u|,|;|:)|(ua|ui|au|ai|ia|iu|b|c|d|e|f|g|h|j|k|l|m|n|ñ|o|p|q|r|s|t|v|w|x|y|z|,|;|:))*\\.)$";
 
 let validationHistory = [];
 let acceptedCount = 0;
 let rejectedCount = 0;
 
-// Validar al presionar Enter
 document.getElementById('inputString').addEventListener('keypress', function(e) {
     if (e.key === 'Enter') {
         validateInput();
     }
 });
 
-// Manejar carga de archivos
 document.getElementById('fileInput').addEventListener('change', async function(e) {
     const file = e.target.files[0];
     if (!file) return;
@@ -21,7 +18,7 @@ document.getElementById('fileInput').addEventListener('change', async function(e
     fileNameDisplay.textContent = `📄 ${file.name}`;
     fileNameDisplay.style.color = 'rgba(0, 255, 255, 0.7)';
 
-    try {
+     try {
         let text = '';
         
         if (file.name.endsWith('.txt')) {
@@ -122,7 +119,6 @@ function clearHistory() {
     updateStats();
 }
 
-// Enfocar el input al cargar
 window.onload = function() {
     document.getElementById('inputString').focus();
 };
